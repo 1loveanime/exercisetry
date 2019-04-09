@@ -1,0 +1,23 @@
+header {
+	width: 100%;
+	height: 75px;
+	background-color: #ffb7c5;
+}
+
+footer {
+	width: 100%;
+	height: 40px;
+	background-color: #ffb7e9;
+	padding: 10px;
+}
+
+.body-padding {
+	padding-top: 10px;
+	padding-bottom: 70px;
+}
+
+.loginbuttonposition {
+	position: absolute;
+	right: 10px;
+	top: 32px;
+}

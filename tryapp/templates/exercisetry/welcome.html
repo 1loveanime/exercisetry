@@ -1,0 +1,19 @@
+{% extends 'Exercise3app/base.html'%}
+
+{% block content %}
+<div class="row">
+	{% if user.is_authenticated %}
+		<h4>Welcome my friend {{ user.username }}!</h4>
+	{% else %}
+		<h4> Welcome annonymous user! Please login to view idol details</h4>
+	{% endif %}
+</div>
+<div class="row">
+	<form method="POST" enctype="multipart/form-data">
+		 <input type="file" name="csv_file" id="csv_file" required="True" class="form-control">
+	</form>
+</div>
+</div>
+<div class="row">
+</div>
+{% endblock %}
