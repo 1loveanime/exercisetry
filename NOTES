@@ -1,0 +1,811 @@
+starting a new project
+    create new folder
+    create virtualenv python3 -m venv myvenv
+    source myvenv/bin/activate
+    install django framework pip install django OR pip install -r requirements.txt WITH Django~=2.0.6 inside text file
+    then type on virtualenv django-admin startproject mysite .
+    python manage.py startapp *appname*
+    pip install psycopg2
+    
+    sudo apt-get install postgresql postgresql-contrib      # for installing postgres
+    sudo apt-get install build-essential                    # optional if there are errors
+
+    RUNNING PSQL
+        sudo su postgres
+        psql
+        include installed apps settings
+
+        CREATE DATABASE *DBNAME* OWNER *username*;
+        pip install psycopg2
+        
+        paste this on settings.py
+            DATABASES = {
+                'default': {
+                    'ENGINE': 'django.db.backends.postgresql',
+                    'NAME': '',
+                    'USER': '',
+                    'PASSWORD': '',
+                    'HOST': 'localhost',
+                    'PORT': '',
+                }
+            }
+
+    python -c "import psycopg2"
+    python manage.py migrate
+    python manage.py createsuperuser --username name
+    
+    add ur app on the settings.py
+
+    git init
+    create a .gitignore file with the FF text
+        *.pyc
+        *~
+        __pycache__
+        myvenv
+        db.sqlite3
+        /static
+        .DS_Store
+
+    (when pushing)
+    git status
+    git add --all
+    git commit -m "first commit"
+    git remote add origin https://github.com/1loveanime/Exercise2.git
+    git push -u origin master
+
+
+
+get_object_or_404
+function to get the object or show an 404 error when it doesn't exist (mga pk to mostly)
+
+There’s also a get_list_or_404() function, which works just as get_object_or_404() – except using filter() instead of get(). It raises Http404 if the list is empty.
+
+DJANGO MODELS
+https://docs.djangoproject.com/en/2.0/ref/models/fields/#field-types
+iba ibang mga predefined fields
+
+    models.CharField – this is how you define text with a limited number of characters.
+    models.TextField – this is for long text without a limit. Sounds ideal for blog post content, right?
+    models.DateTimeField – this is a date and time.
+    models.ForeignKey – this is a link to another model.
+
+    post = models.ForeignKey('blog.Post', on_delete=models.CASCADE, related_name='comments')
+    The related_name option in models.ForeignKey allows us to have access to comments from within the Post model.
+
+
+models.py is for models ng website at database
+
+urlpatterns = [
+    path('accounts/login/', views.LoginView.as_view(), name='login'),
+    ]
+    path django function
+    ' ' url address
+    views.LoginView yung function sa views na gagamitin
+    name is kung ano name nung url na yun
+
+redirect vs render
+redirect is redirection lang ng html, render is for going to another page + stuffs to do
+RENDER IS IMPORTANT TO SEND YOUR HTTP TO THE REQUESTER
+
+{% if %}
+	html stuffs
+{% else %}
+	html stuffs
+{% endif %}
+
+then we want to do the line <a class="btn btn-default" href="{% url 'post_publish' pk=post.pk %}">Publish</a>. Note that we are passing a pk variable in the {% url %}.
+
+pwede po yung ganyan sa mga html files
+
+
+<a class="btn btn-default" href="{% url 'post_remove' pk=post.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
+
+yung post.pk is  nagsasabi na gagamitin nya yung pk ng post
+
+
+
+DJANGO AUTH
+https://docs.djangoproject.com/en/2.0/topics/auth/default/
+
+
+login_required a decorator found in django.contrib.auth.decorators so that a function will check if the user is currently loging or not before doing the function
+
+
+LOGIN_REDIRECT_URL = '/'
+para po mag redirect sa home / root upon login
+
+
+on_delete=models.CASCADE
+used so that when you delete a certain thing, it will also delete its foreign stuffs
+
+
+admin.site.register(Comment)
+To register the Comment model in the admin panel, go to blog/admin.py and add this line:
+also dont forget to import
+
+
+{% empty %}
+<p>No comments here yet :(</p>
+
+
+Everything works! There is one small tweak we can make. In our post list page -- under posts -- we currently see the number of all the comments the blog post has received. Let's change that to show the number of approved comments there.
+To fix this, go to blog/templates/blog/post_list.html and change the line:
+<a href="{% url 'post_detail' pk=post.pk %}">Comments: {{ post.comments.count }}</a>
+to:
+<a href="{% url 'post_detail' pk=post.pk %}">Comments: {{ post.approved_comments.count }}</a>
+Finally, add this method to the Post model in blog/models.py:
+def approved_comments(self):
+    return self.comments.filter(approved_comment=True)
+
+
+path('polls/', include('polls.urls')),
+The idea behind include() is to make it easy to plug-and-play URLs. Since polls are in their own URLconf (polls/urls.py), they can be placed under “/polls/”, or under “/fun_polls/”, or under “/content/polls/”, or any other path root, and the app will still work.
+You should always use include() when you include other URL patterns. admin.site.urls is the only exception to this.
+
+
+The code is straightforward. Each model is represented by a class that subclasses django.db.models.Model. Each model has a number of class variables, each of which represents a database field in the model.
+Finally, note a relationship is defined, using ForeignKey. That tells Django each Choice is related to a single Question. Django supports all the common database relationships: many-to-one, many-to-many, and one-to-one.
+https://docs.djangoproject.com/en/dev/topics/db/queries/#backwards-related-objects
+foreignkey choice_set
+>>> c = q.choice_set.create(choice_text='Just hacking again', votes=0)
+# Choice objects have API access to their related Question objects.
+>>> c.question
+<Question: What's up?>
+# And vice versa: Question objects get access to Choice objects.
+>>> q.choice_set.all()
+
+# Use double underscores to separate relationships.
+# This works as many levels deep as you want; there's no limit.
+# Find all Choices for any question whose pub_date is in this year
+# (reusing the 'current_year' variable we created above).
+>>> Choice.objects.filter(question__pub_date__year=current_year)
+<QuerySet [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]>
+https://docs.djangoproject.com/en/2.0/ref/models/relations/
+
+
+Each view is responsible for doing one of two things: returning an HttpResponse object containing the content for the requested page, or raising an exception such as Http404. The rest is up to you.
+
+Your view can read records from a database, or not. It can use a template system such as Django’s – or a third-party Python template system – or not. It can generate a PDF file, output XML, create a ZIP file on the fly, anything you want, using whatever Python libraries you want.
+
+
+The tutorial project has just one app, polls. In real Django projects, there might be five, ten, twenty apps or more. How does Django differentiate the URL names between them? For example, the polls app has a detail view, and so might an app on the same project that is for a blog. How does one make it so that Django knows which app view to create for a url when using the {% url %} template tag?
+
+The answer is to add namespaces to your URLconf. In the polls/urls.py file, go ahead and add an app_name to set the application namespace
+
+then change the target of html into
+{% url 'polls:detail' question.id %}
+
+
+Using method="post" (as opposed to method="get") is very important, because the act of submitting this form will alter data server-side. Whenever you create a form that alters data server-side, use method="post".
+
+
+
+ Thankfully, you don’t have to worry too hard, because Django comes with a very easy-to-use system for protecting against it. In short, all POST forms that are targeted at internal URLs should use the {% csrf_token %} template tag.
+
+
+
+request.POST is a dictionary-like object that lets you access submitted data by key name. In this case, request.POST['choice'] returns the ID of the selected choice, as a string. request.POST values are always strings.
+
+request.POST is a dictionary-like object that lets you access submitted data by key name. In this case, request.POST['choice'] returns the ID of the selected choice, as a string. request.POST values are always strings.
+
+
+# Always return an HttpResponseRedirect after successfully dealing
+# with POST data. This prevents data from being posted twice if a
+# user hits the Back button.
+
+
+
+one way of showing error when wrong selected
+        return render(request, 'polls/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+
+{% extends 'base.html'%}
+{% block content %}
+{% endblock %}
+on both html files to pass stuffs on each other
+
+
+LOGIN_REDIRECT_URL = '/'
+change redirection of login
+
+REGISTRATION FORM
+def registration(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('login')
+    else:
+        form = RegistrationForm()
+    return render(request, 'registration/registration.html', {'form': form})
+is.vadid is function to check if form is valid
+if request.method == 'POST':, si html sasabihin nya kung post yung submission
+else ipapakita nya lang yung buong form
+
+yung clean_data, kukunin nya yung naprocess na na data, meaning yung na validate na then ittry nyang login using authenticate + login
+
+
+
+WEEK 3
+FIELDS / MODELS
+
+The most important part of a model – and the only required part of a model – is the list of database fields it defines. Fields are specified by class attributes. Be careful not to choose field names that conflict with the models API like clean, save, or delete.
+
+
+The first element in each tuple is the value that will be stored in the database. The second element is displayed by the field’s form widget.
+Given a model instance, the display value for a field with choices can be accessed using the get_FOO_display() method.
+
+
+primary_key
+
+    If True, this field is the primary key for the model.
+
+    If you don’t specify primary_key=True for any fields in your model, Django will automatically add an IntegerField to hold the primary key, so you don’t need to set primary_key=True on any of your fields unless you want to override the default primary-key behavior. For more, see Automatic primary key fields.
+
+    The primary key field is read-only. If you change the value of the primary key on an existing object and then save it, a new object will be created alongside the old one. For example:
+
+
+
+Field.verbose_name
+A human-readable name for the field. If the verbose name isn’t given, Django will automatically create it using the field’s attribute name, converting underscores to spaces. See Verbose field names.
+
+
+It’s suggested, but not required, that the name of a ForeignKey field (manufacturer in the example above) be the name of the model, lowercase. You can, of course, call the field whatever you want. For example
+
+
+
+It’s suggested, but not required, that the name of a ManyToManyField (toppings in the example above) be a plural describing the set of related model objects.
+
+It doesn’t matter which model has the ManyToManyField, but you should only put it in one of the models – not both.
+
+Generally, ManyToManyField instances should go in the object that’s going to be edited on a form. In the above example, toppings is in Pizza (rather than Topping having a pizzas ManyToManyField ) because it’s more natural to think about a pizza having toppings than a topping being on multiple pizzas. The way it’s set up above, the Pizza form would let users select the toppings.
+
+
+
+When defining a many-to-many relationship from a model to itself, using an intermediary model, you must use symmetrical=False (see the model field reference).
+
+
+
+Model metadata is “anything that’s not a field”, such as ordering options (ordering), database table name (db_table), or human-readable singular and plural names (verbose_name and verbose_name_plural). None are required, and adding class Meta to a model is completely optional.
+
+
+
+__str__()
+
+    A Python “magic method” that returns a string representation of any object. This is what Python and Django will use whenever a model instance needs to be coerced and displayed as a plain string. Most notably, this happens when you display an object in an interactive console or in the admin.
+
+
+
+A classic use-case for overriding the built-in methods is if you want something to happen whenever you save an object. For example (see save() for documentation of the parameters it accepts):
+
+  def save(self, *args, **kwargs):
+        do_something()
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+        do_something_else()
+
+It’s important to remember to call the superclass method – that’s that super().save(*args, **kwargs) business – to ensure that the object still gets saved into the database. If you forget to call the superclass method, the default behavior won’t happen and the database won’t get touched.
+
+It’s also important that you pass through the arguments that can be passed to the model method – that’s what the *args, **kwargs bit does. Django will, from time to time, extend the capabilities of built-in model methods, adding new arguments. If you use *args, **kwargs in your method definitions, you are guaranteed that your code will automatically support those arguments when they are added.
+
+
+
+You write your base class and put abstract=True in the Meta class. This model will then not be used to create any database table. Instead, when it is used as a base class for other models, its fields will be added to those of the child class.
+
+
+
+Multi-table inheritance
+If you have a Place that is also a Restaurant, you can get from the Place object to the Restaurant object by using the lower-case version of the model name:
+>>> p = Place.objects.get(id=12)
+# If p is a Restaurant object, this will give the child class:
+>>> p.restaurant
+<Restaurant: ...>
+
+
+
+If you are using related_name or related_query_name on a ForeignKey or ManyToManyField, you must always specify a unique reverse name and query name for the field. This would normally cause a problem in abstract base classes, since the fields on this class are included into each of the child classes, with exactly the same values for the attributes (including related_name and related_query_name) each time.
+
+To work around this problem, when you are using related_name or related_query_name in an abstract base class (only), part of the value should contain '%(app_label)s' and '%(class)s'.
+
+
+
+proxy models
+This is what proxy model inheritance is for: creating a proxy for the original model. You can create, delete and update instances of the proxy model and all the data will be saved as if you were using the original (non-proxied) model. The difference is that you can change things like the default model ordering or the default manager in the proxy, without having to alter the original.
+
+
+
+
+QUERIES
+filter(**kwargs)
+    Returns a new QuerySet containing objects that match the given lookup parameters.
+exclude(**kwargs)
+    Returns a new QuerySet containing objects that do not match the given lookup parameters.
+
+
+
+filter()
+it will get null, 1 or many items
+get()
+it will get single item, null or many items will raise an error
+
+
+
+limitting
+Entry.objects.all()[:5]
+objects (OFFSET 5 LIMIT 5):
+Negative indexing (i.e. Entry.objects.all()[-1]) is not supported.
+
+
+Field Lookups (__)(double underscores)
+Basic lookups keyword arguments take the form field__lookuptype=value. (That’s a double-underscore). For example:
+>>> Entry.objects.filter(pub_date__lte='2006-01-01')
+get(id__exact=14)
+exact for exact 
+iexact case insensitive exact
+contains for containing string
+icontains case insensitive version
+
+
+
+
+Sometimes you want to set a field to a particular value for all the objects in a QuerySet. You can do this with the update() method. For example:
+# Update all the headlines with pub_date in 2007.
+Entry.objects.filter(pub_date__year=2007).update(headline='Everything is the same')
+
+
+
+
+Generating aggregates over a QuerySet
+>>> from django.db.models import Avg
+>>> Book.objects.all().aggregate(Avg('price'))
+{'price__avg': 34.35}
+
+>>> Book.objects.aggregate(Avg('price'), Max('price'), Min('price'))
+{'price__avg': 34.35, 'price__max': Decimal('81.20'), 'price__min': Decimal('12.99')}
+
+
+
+
+Per-object summaries can be generated using the annotate() clause. When an annotate() clause is specified, each object in the QuerySet will be annotated with the specified values.
+
+
+
+
+Combining multiple aggregations with annotate() will yield the wrong results because joins are used instead of subqueries:
+>>> q = Book.objects.annotate(Count('authors'))
+
+
+
+>>> Publisher.objects.aggregate(oldest_pubdate=Min('book__pubdate'))
+(The resulting dictionary will have a key called 'oldest_pubdate'. If no such alias were specified, it would be the rather long 'book__pubdate__min'.)
+
+
+
+order_by()
+Annotations can be used as a basis for ordering. When you define an order_by() clause, the aggregates you provide can reference any alias defined as part of an annotate() clause in the query.
+
+
+
+Aggregating annotations
+You can also generate an aggregate on the result of an annotation. When you define an aggregate() clause, the aggregates you provide can reference any alias defined as part of an annotate() clause in the query.
+For example, if you wanted to calculate the average number of authors per book you first annotate the set of books with the author count, then aggregate that author count, referencing the annotation field:
+
+>>> from django.db.models import Avg, Count
+>>> Book.objects.annotate(num_authors=Count('authors')).aggregate(Avg('num_authors'))
+{'num_authors__avg': 1.66}
+
+
+
+SEARCH
+
+
+
+
+Manager names
+
+By default, Django adds a Manager with the name objects to every Django model class. However, if you want to use objects as a field name, or if you want to use a name other than objects for the Manager, you can rename it on a per-model basis. To rename the Manager for a given class, define a class attribute of type models.Manager() on that model. For example:
+
+
+
+
+
+Modifying a manager’s initial QuerySet https://docs.djangoproject.com/en/2.0/topics/db/managers/#modifying-a-manager-s-initial-queryset
+For example, the following model has two Managers – one that returns all objects, and one that returns only the books by Roald Dahl:
+# First, define the Manager subclass.
+class DahlBookManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(author='Roald Dahl')
+
+# Then hook it into the Book model explicitly.
+class Book(models.Model):
+    title = models.CharField(max_length=100)
+    author = models.CharField(max_length=50)
+
+    objects = models.Manager() # The default manager.
+    dahl_objects = DahlBookManager() # The Dahl-specific manager.
+
+
+
+HTML forms  https://docs.djangoproject.com/en/2.0/topics/forms/
+
+In HTML, a form is a collection of elements inside <form>...</form> that allow a visitor to do things like enter text, select options, manipulate objects or controls, and so on, and then send that information back to the server.
+
+
+
+
+POST
+Any request that could be used to change the state of the system - for example, a request that makes changes in the database - should use POST. GET should be used only for requests that do not affect the state of the system.
+GET
+GET would also be unsuitable for a password form, because the password would appear in the URL, and thus, also in browser history and server logs, all in plain text. Neither would it be suitable for large quantities of data, or for binary data, such as an image. A Web application that uses GET requests for admin forms is a security risk: it can be easy for an attacker to mimic a form’s request to gain access to sensitive parts of the system. POST, coupled with other protections like Django’s CSRF protection offers more control over access.
+
+
+
+
+The Form class
+class NameForm(forms.Form):
+    your_name = forms.CharField(label='Your name', max_length=100)
+The field’s maximum allowable length is defined by max_length. This does two things. It puts a maxlength="100" on the HTML <input> (so the browser should prevent the user from entering more than that number of characters in the first place). It also means that when Django receives the form back from the browser, it will validate the length of the data.
+
+A Form instance has an is_valid() method, which runs validation routines for all its fields. When this method is called, if all fields contain valid data, it will:
+    return True
+    place the form’s data in its cleaned_data attribute.
+
+
+
+The view    https://docs.djangoproject.com/en/2.0/topics/forms/#the-view
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
+from .forms import NameForm
+
+def get_name(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = NameForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            return HttpResponseRedirect('/thanks/')
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NameForm()
+
+    return render(request, 'name.html', {'form': form})
+
+
+
+Widgets    https://docs.djangoproject.com/en/2.0/topics/forms/#widgets
+
+Each form field has a corresponding Widget class, which in turn corresponds to an HTML form widget such as <input type="text">.
+
+
+
+Field data
+
+Whatever the data submitted with a form, once it has been successfully validated by calling is_valid() (and is_valid() has returned True), the validated form data will be in the form.cleaned_data dictionary. This data will have been nicely converted into Python types for you.
+
+Note
+You can still access the unvalidated data directly from request.POST at this point, but the validated data is better.
+
+
+
+
+Rendering fields manually
+Each field is available as an attribute of the form using {{ form.name_of_field }}, and in a Django template, will be rendered appropriately.
+
+
+
+
+Rendering form error messages
+Using {{ form.name_of_field.errors }} displays a list of form errors, rendered as an unordered list.
+
+The list has a CSS class of errorlist to allow you to style its appearance. If you wish to further customize the display of errors you can do so by looping over them:
+
+{% if form.subject.errors %}
+    <ol>
+    {% for error in form.subject.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+{% endif %}
+
+Non-field errors (and/or hidden field errors that are rendered at the top of the form when using helpers like form.as_p()) will be rendered with an additional class of nonfield to help distinguish them from field-specific errors. For example, {{ form.non_field_errors }} would look like:
+
+<ul class="errorlist nonfield">
+    <li>Generic validation error</li>
+</ul>
+
+
+
+
+Looping over the form’s fields    https://docs.djangoproject.com/en/2.0/topics/forms/#looping-over-the-form-s-fields
+useful attributes for field
+
+
+
+Reusable form templates    https://docs.djangoproject.com/en/2.0/topics/forms/#reusable-form-templates
+If your site uses the same rendering logic for forms in multiple places, you can reduce duplication by saving the form’s loop in a standalone template and using the include tag to reuse it in other templates:
+
+
+
+
+TEMPLATES
+get_template(template_name, using=None)
+This function loads the template with the given name and returns a Template object.
+
+select_template(template_name_list, using=None)[source]¶
+select_template() is just like get_template(), except it takes a list of template names. It tries each name in order and returns the first template that exists.
+
+
+
+ Template.render(context=None, request=None)¶
+
+    Renders this template with a given context.
+    If context is provided, it must be a dict. If it isn’t provided, the engine will render the template with an empty context.
+
+
+
+
+
+
+render_to_string(template_name, context=None, request=None, using=None)[source]¶
+
+    render_to_string() loads a template like get_template() and calls its render() method immediately. It takes the following arguments.
+
+    template_name
+        The name of the template to load and render. If it’s a list of template names, Django uses select_template() instead of get_template() to find the template.
+    context
+        A dict to be used as the template’s context for rendering.
+    request
+        An optional HttpRequest that will be available during the template’s rendering process.
+    using
+        An optional template engine NAME. The search for the template will be restricted to that engine.
+
+    Usage example:
+
+    from django.template.loader import render_to_string
+    rendered = render_to_string('my_template.html', {'foo': 'bar'})
+
+
+
+EXERCISE3
+kasi nag get_object_or_404(IdolDetail, pk=pk) so it means 1 record/object lang siya, di mo siya pwede i for loop kasi list ang ginagamit sa for loop
+
+
+
+Complex lookups with Q objects https://docs.djangoproject.com/en/2.2/topics/db/queries/#complex-lookups-with-q-objects
+
+Keyword argument queries – in filter(), etc. – are “AND”ed together. If you need to execute more complex queries (for example, queries with OR statements), you can use Q objects.
+
+A Q object (django.db.models.Q) is an object used to encapsulate a collection of keyword arguments. These keyword arguments are specified as in “Field lookups” above.
+
+For example, this Q object encapsulates a single LIKE query:
+
+from django.db.models import Q
+Q(question__startswith='What')
+
+
+
+.distinct() for queryset. para po maremove nya mga double entry sa isang queryset
+
+
+to copy PK cause saving forms doesn'nt mean forms variable will have pk
+formspk = forms.save(commit=False)
+commit=False is to save the forms while not affecting the DB
+
+formsinfo = get_object_or_404(IdolDetail, pk=pk)
+forms = IdolCreationForm(instance = formsinfo)
+
+yung instance = formsinfo means lang nun is mageedit ka instead of creating new object
+then nilagay nya sa forms para pagbukas mo nung page nakapredefined na yung data nung PK
+
+
+
+defined this inside a model, it will show better ui on django admin and etc
+def __str__(self):
+        return self.namefirst + " " + self.namelast
+
+
+
+The querysets can be merged like in the example below, using the | operator:
+stories = django_stories | vitor_stories  # merge querysets 
+
+
+alreadyanobject = model.objects.all()
+filtered = alreadyanobject.filter()
+
+
+the enctype part is SUPER IMPORTANT WHEN UPLOADING FILES
+<form method="post" enctype="multipart/form-data">
+
+Note that request.FILES will only contain data if the request method was POST and the <form> that posted the request has the attribute enctype="multipart/form-data". Otherwise, request.FILES will be empty.
+
+
+
+
+get_or_create
+this function will do this on the backend
+try:
+    obj = Person.objects.get(first_name='John', last_name='Lennon')
+except Person.DoesNotExist:
+    obj = Person(first_name='John', last_name='Lennon', birthday=date(1940, 10, 9))
+    obj.save()
+so just use get_or_create query to lessen the code
+
+
+to access foreign key, use name_set
+idolsongsposition_set
+
+
+html can use query set codes in html
+but no need to place ()
+idolinfo.idolsongsposition_set.all
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PEP8
+79 characters max
+
+# Aligned with opening delimiter.
+foo = long_function_name(var_one, var_two,
+                         var_three, var_four)
+
+# Add 4 spaces (an extra level of indentation) to distinguish arguments from the rest.
+def long_function_name(
+        var_one, var_two, var_three,
+        var_four):
+    print(var_one)
+
+my_list = [
+    1, 2, 3,
+    4, 5, 6,
+    ]
+
+In Python code, it is permissible to break before or after a binary operator, as long as the convention is consistent locally. For new code Knuth's style is suggested.
+
+
+Blank Lines
+
+Surround top-level function and class definitions with two blank lines.
+
+Method definitions inside a class are surrounded by a single blank line.
+
+Extra blank lines may be used (sparingly) to separate groups of related functions. Blank lines may be omitted between a bunch of related one-liners (e.g. a set of dummy implementations).
+
+Use blank lines in functions, sparingly, to indicate logical sections.
+
+Python accepts the control-L (i.e. ^L) form feed character as whitespace; Many tools treat these characters as page separators, so you may use them to separate pages of related sections of your file. Note, some editors and web-based code viewers may not recognize control-L as a form feed and will show another glyph in its place.
+
+
+Imports should usually be on separate lines:
+Yes: import os
+     import sys
+
+No:  import sys, os
+
+It's okay to say this though:
+from subprocess import Popen, PIPE
+
+
+Imports should be grouped in the following order:
+    Standard library imports.                    python imports
+    Related third party imports.                 django imports
+    Local application/library specific imports.  local imports/apps/made by you
+You should put a blank line between each group of imports.
+
+if this spelling causes local name clashes, then spell them explicitly:
+import myclass
+import foo.bar.yourclass
+and use "myclass.MyClass" and "foo.bar.yourclass.YourClass".
+
+
+Wildcard imports (from <module> import *) should be avoided
+
+
+Module level "dunders" (i.e. names with two leading and two trailing underscores) such as __all__, __author__, __version__, etc. should be placed after the module docstring but before any import statements except from __future__ imports.
+"""This is the example module.
+
+This module does stuff.
+"""
+
+from __future__ import barry_as_FLUFL
+
+__all__ = ['a', 'b', 'c']
+__version__ = '0.1'
+__author__ = 'Cardinal Biggles'
+
+import os
+import sys
+
+
+
+Avoid extraneous whitespace in the following situations:
+Immediately inside parentheses, brackets or braces.
+Between a trailing comma and a following close parenthesis.
+Immediately before a comma, semicolon, or colon:
+Immediately before the open parenthesis that starts the argument list of a function call:
+Immediately before the open parenthesis that starts an indexing or slicing:
+More than one space around an assignment (or other) operator to align it with another.
+Avoid trailing whitespace anywhere. Because it's usually invisible, it can be confusing: e.g. a backslash followed by a space and a newline does not count as a line continuation marker. Some editors don't preserve it and many projects (like CPython itself) have pre-commit hooks that reject it.
+Always surround these binary operators with a single space on either side: assignment (=), augmented assignment (+=, -= etc.), comparisons (==, <, >, !=, <>, <=, >=, in, not in, is, is not), Booleans (and, or, not).
+If operators with different priorities are used, consider adding whitespace around the operators with the lowest priority(ies). Use your own judgment; however, never use more than one space, and always have the same amount of whitespace on both sides of a binary operator.
+
+Function annotations should use the normal rules for colons and always have spaces around the -> arrow if present. (See Function Annotations below for more about function annotations.)
+Don't use spaces around the = sign when used to indicate a keyword argument, or when used to indicate a default value for an unannotated function parameter.
+When combining an argument annotation with a default value, however, do use spaces around the = sign:
+Compound statements (multiple statements on the same line) are generally discouraged.
+When trailing commas are redundant, they are often helpful when a version control system is used, when a list of values, arguments or imported items is expected to be extended over time. The pattern is to put each value (etc.) on a line by itself, always adding a trailing comma, and add the close parenthesis/bracket/brace on the next line. However it does not make sense to have a trailing comma on the same line as the closing delimiter (except in the above case of singleton tuples).
+
+
+Use the function naming rules: lowercase with words separated by underscores as necessary to improve readability.
+
+Comparisons to singletons like None should always be done with is or is not, never the equality operators.
+
+
+When catching exceptions, mention specific exceptions whenever possible instead of using a bare except: clause:
+
+A bare except: clause will catch SystemExit and KeyboardInterrupt exceptions, making it harder to interrupt a program with Control-C, and can disguise other problems. If you want to catch all exceptions that signal program errors, use except Exception: (bare except is equivalent to except BaseException:).
+
+
+
+Be consistent in return statements. Either all return statements in a function should return an expression, or none of them should. If any return statement returns an expression, any return statements where no value is returned should explicitly state this as return None, and an explicit return statement should be present at the end of the function (if reachable).
+
+Use ''.startswith() and ''.endswith() instead of string slicing to check for prefixes or suffixes.
+Object type comparisons should always use isinstance() instead of comparing types directly.
+
+Don't compare boolean values to True or False using ==.
+
+Yes:   if greeting:
+No:    if greeting == True:
+Worse: if greeting is True:
+
+
+
+CONTANTS SHOULD BE UPPERCASE
+CONTANT_LIST = [
+    'HEHE',
+    edi wow,
+]

@@ -1,6 +1,6 @@
-from .forms import RegistrationForm, PersonCreationForm
 from django.shortcuts import render, redirect
 
+from .forms import RegistrationForm, PersonCreationForm
 
 from django.contrib.auth.decorators import login_required
 from .models import PersonDetail
@@ -19,7 +19,7 @@ def registration(request):
 			return redirect('login')
 	else:
 		form = RegistrationForm()
-	return render(request, 'registration/registration.html', {'form' : form})
+	return render(request, 'registration/registration.html', {'form':form})
 
 
 @login_required
