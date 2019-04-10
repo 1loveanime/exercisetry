@@ -1,6 +1,8 @@
 from .forms import RegistrationForm, PersonCreationForm
 from django.shortcuts import render, redirect
 
+
+from django.contrib.auth.decorators import login_required
 from .models import PersonDetail
 import csv
 from django.http import HttpResponse
@@ -20,14 +22,16 @@ def registration(request):
 	return render(request, 'registration/registration.html', {'form' : form})
 
 
+@login_required
 def person_creation(request):
 	if "csv_export" in request.GET:
 		response = HttpResponse(content_type='text/csv')
 		response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 		writer = csv.writer(response)
-		holderquery = PersonDetail.objects.filter(user_id=1)
+		holderquery = PersonDetail.objects.filter(user_id=request.user.pk)
+		writer.writerow([PersonDetail.firstname])
 		for x in holderquery:
-			writer.writerow([x.firstname, x.lastname])
+			writer.writerow([x.firstname, x.lastname, x.address])
 		return response
 
 	if request.method == 'POST':
