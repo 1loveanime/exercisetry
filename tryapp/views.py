@@ -1,11 +1,12 @@
-from .forms import RegistrationForm
-from .models import CSVUpload
+from .forms import RegistrationForm, PersonCreationForm
 from django.shortcuts import render, redirect
 
+from .models import PersonDetail
+import csv
+from django.http import HttpResponse
 
 def welcome(request):
-	csv_list = CSVUpload.import_data(data = open(request.csv))
-	return render(request, 'exercisetry/base.html')
+	return render(request, 'exercisetry/welcome.html')
 
 
 def registration(request):
@@ -13,7 +14,29 @@ def registration(request):
 		form = RegistrationForm(request.POST)
 		if form.is_valid():
 			form.save()
-			return redirect('login.html')
+			return redirect('login')
 	else:
 		form = RegistrationForm()
 	return render(request, 'registration/registration.html', {'form' : form})
+
+
+def person_creation(request):
+	if "csv_export" in request.GET:
+		response = HttpResponse(content_type='text/csv')
+		response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+		writer = csv.writer(response)
+		holderquery = PersonDetail.objects.filter(user_id=1)
+		for x in holderquery:
+			writer.writerow([x.firstname, x.lastname])
+		return response
+
+	if request.method == 'POST':
+		form = PersonCreationForm(request.POST)
+		if form.is_valid():
+			form = form.save(commit=False)
+			form.user = request.user
+			form.save()
+			return redirect('person_creation')
+	else:
+		form = PersonCreationForm()
+	return render(request, 'exercisetry/person_creation.html', {'form':form})
