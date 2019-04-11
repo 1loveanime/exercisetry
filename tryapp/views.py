@@ -7,6 +7,8 @@ from .models import PersonDetail
 import csv
 from django.http import HttpResponse
 
+import os
+
 def welcome(request):
 	return render(request, 'exercisetry/welcome.html')
 
@@ -34,13 +36,22 @@ def person_creation(request):
 			writer.writerow([x.firstname, x.lastname, x.address])
 		return response
 
+	# if request.method == 'POST':
+	# 	form = PersonCreationForm(request.POST)
+	# 	if form.is_valid():
+	# 		form = form.save(commit=False)
+	# 		form.user = request.user
+	# 		form.save()
+	# 		return redirect('person_creation')
 	if request.method == 'POST':
-		form = PersonCreationForm(request.POST)
-		if form.is_valid():
-			form = form.save(commit=False)
-			form.user = request.user
-			form.save()
-			return redirect('person_creation')
+		with open(request.FILES) as csvfile:
+			reader = csv.DickReader(csvfile)
+			for row in reader:
+				form = PersonDetail(firstname=row['firstname'], lastname=row['lastname'])
+			if form.is_valid():
+				form = form.save(commit=False)
+				form.user = request.user
+				form.save()
 	else:
 		form = PersonCreationForm()
 	return render(request, 'exercisetry/person_creation.html', {'form':form})
