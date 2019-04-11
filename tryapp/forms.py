@@ -11,5 +11,5 @@ class RegistrationForm(UserCreationForm):
 class PersonCreationForm(ModelForm):
 	class Meta:
 		model = PersonDetail
-		# fields = ('firstname', 'lastname', 'phone_number', 'address',)
+		fields = ('firstname', 'lastname', 'phone_number', 'address',)
 		exclude = ('user',)

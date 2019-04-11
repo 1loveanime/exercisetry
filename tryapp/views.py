@@ -43,15 +43,21 @@ def person_creation(request):
 	# 		form.user = request.user
 	# 		form.save()
 	# 		return redirect('person_creation')
+
+	
 	if request.method == 'POST':
-		with open(request.FILES) as csvfile:
-			reader = csv.DickReader(csvfile)
+		uploadedcsvfile = request.FILES['csv_file'].name
+		with open(uploadedcsvfile) as csvfile:
+			reader = csv.DictReader(csvfile)
 			for row in reader:
-				form = PersonDetail(firstname=row['firstname'], lastname=row['lastname'])
-			if form.is_valid():
-				form = form.save(commit=False)
-				form.user = request.user
-				form.save()
-	else:
-		form = PersonCreationForm()
+				ukulele = PersonDetail(firstname=row['firstname'], lastname=row['lastname'], phone_number=row['phone_number'])
+				gitar = PersonCreationForm(ukulele)
+				if gitar.is_valid():
+					gitar.save()
+			# if form.is_valid():
+			# 	form = form.save(commit=False)
+			# 	form.user = request.user
+			# 	form.save()
+
+	form = PersonCreationForm()
 	return render(request, 'exercisetry/person_creation.html', {'form':form})
