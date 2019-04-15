@@ -654,6 +654,193 @@ idolinfo.idolsongsposition_set.all
 
 
 
+CLASS BASED VIEWS class view https://docs.djangoproject.com/en/2.0/topics/class-based-views/
+
+Using class-based views
+class MyView(View):
+    def get(self, request):
+        # <view logic>
+        return HttpResponse('result')
+
+
+
+Using mixins https://docs.djangoproject.com/en/2.0/topics/class-based-views/intro/#using-mixins
+
+Mixins are a form of multiple inheritance where behaviors and attributes of multiple parent classes can be combined.
+
+
+
+
+Decorating class-based views
+The simplest way of decorating class-based views is to decorate the result of the as_view() method. The easiest place to do this is in the URLconf where you deploy your view:
+path('about/', login_required(TemplateView.as_view(template_name="secret.html"))),
+
+
+
+Decorating the class
+The method_decorator decorator transforms a function decorator into a method decorator so that it can be used on an instance method. For example:
+class ProtectedView(TemplateView):
+    template_name = 'secret.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+Or, more succinctly, you can decorate the class instead and pass the name of the method to be decorated as the keyword argument name:
+@method_decorator(login_required, name='dispatch')
+class ProtectedView(TemplateView):
+    template_name = 'secret.html'
+
+
+
+If you have a set of common decorators used in several places, you can define a list or tuple of decorators and use this instead of invoking method_decorator() multiple times. These two classes are equivalent:
+
+decorators = [never_cache, login_required]
+
+@method_decorator(decorators, name='dispatch')
+class ProtectedView(TemplateView):
+    template_name = 'secret.html'
+
+
+
+
+
+
+from django.views.generic 
+library of generic views
+
+
+
+specifying model = Publisher is really just shorthand for saying queryset = Publisher.objects.all(). However, by using queryset to define a filtered list of objects you can be more specific about the objects that will be visible in the view (see Making queries for more information about QuerySet objects, and see the class-based views reference for the complete details).
+
+class BookList(ListView):
+    queryset = Book.objects.order_by('-publication_date')
+
+
+
+DYNAMIC FILTERING https://docs.djangoproject.com/en/2.0/topics/class-based-views/generic-display/#dynamic-filtering
+Handily, the ListView has a get_queryset() method we can override. Previously, it has just been returning the value of the queryset attribute, but now we can add more logic.
+
+# views.py
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView
+from books.models import Book, Publisher
+
+class PublisherBookList(ListView):
+
+    template_name = 'books/books_by_publisher.html'
+
+    def get_queryset(self):
+        self.publisher = get_object_or_404(Publisher, name=self.kwargs['publisher'])
+        return Book.objects.filter(publisher=self.publisher)
+
+
+
+
+
+Then we’d write our new view – get_object is the method that retrieves the object – so we simply override it and wrap the call:
+
+from django.utils import timezone
+from django.views.generic import DetailView
+from books.models import Author
+
+class AuthorDetailView(DetailView):
+
+    queryset = Author.objects.all()
+
+    def get_object(self):
+        # Call the superclass
+        object = super().get_object()
+        # Record the last accessed date
+        object.last_accessed = timezone.now()
+        object.save()
+        # Return the object
+        return object
+
+
+
+Form handling with class-based views
+The view can be constructed using a FormView:
+views.py
+
+from myapp.forms import ContactForm
+from django.views.generic.edit import FormView
+
+class ContactView(FormView):
+    template_name = 'contact.html'
+    form_class = ContactForm
+    success_url = '/thanks/'
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        form.send_email()
+        return super().form_valid(form)
+
+
+
+
+Model forms
+
+Generic views really shine when working with models. These generic views will automatically create a ModelForm, so long as they can work out which model class to use:
+
+    If the model attribute is given, that model class will be used.
+    If get_object() returns an object, the class of that object will be used.
+    If a queryset is given, the model for that queryset will be used.
+
+Model form views provide a form_valid() implementation that saves the model automatically. You can override this if you have any special requirements; see below for examples.
+
+Note
+When specifying a custom form class, you must still specify the model, even though the form_class may be a ModelForm.
+
+
+The fields attribute works the same way as the fields attribute on the inner Meta class on ModelForm. Unless you define the form class in another way, the attribute is required and the view will raise an ImproperlyConfigured exception if it’s not.
+
+If you specify both the fields and form_class attributes, an ImproperlyConfigured exception will be raised.
+
+
+
+
+
+GENERIC VIEWS
+pampadali ng buhay ng using class based + generic views
+from django.views.generic import ListView, DetailView
+
+class Index(ListView)
+for listing
+listing usess object_list variable to list the data it gets from
+def get_queryset(self):
+    return query
+
+then use object_list on html
+
+you can use 
+context_object_name = 'all_albums'
+
+to use all_albums instead of object_list on html
+
+
+class Detail(DetailView)
+for viewing in detailed, 
+
+
+
+Avoid anything more complex¶
+
+Generally you can use TemplateResponseMixin and SingleObjectMixin when you need their functionality. As shown above, with a bit of care you can even combine SingleObjectMixin with ListView. However things get increasingly complex as you try to do so, and a good rule of thumb is:
+
+Hint
+Each of your views should use only mixins or views from one of the groups of generic class-based views: detail, list, editing and date. For example it’s fine to combine TemplateView (built in view) with MultipleObjectMixin (generic list), but you’re likely to have problems combining SingleObjectMixin (generic detail) with MultipleObjectMixin (generic list).
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -804,8 +991,8 @@ Worse: if greeting is True:
 
 
 
-CONTANTS SHOULD BE UPPERCASE
-CONTANT_LIST = [
+CONTANTS SHOULD BE UPPERCASE yung hindi nagbabago na mga variables ie questions
+CONSTANT_LIST = [
     'HEHE',
     edi wow,
 ]
